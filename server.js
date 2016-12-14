@@ -4,6 +4,13 @@ var app = express();
 var path = require("path");
 var mongoose = require("mongoose");
 var lodash = require("lodash");
+var morgan = require("morgan");
+var cors = require("cors");
+app.use(express.static(path.join(__dirname, "./../client")));
+app.use(morgan("combined"));
+app.use(cors());
+var i = 0;
+var num = CreatingRandom();
 //nodejs is async thats why we have to use callbacks, oh really?
 var uriString = 'mongodb://localhost/quizapp';
 mongoose.connect(uriString, function (err, res) {
@@ -14,7 +21,6 @@ mongoose.connect(uriString, function (err, res) {
         console.log("Connection successful ");
     }
 });
-var i = 0;
 // function CreatingRandom(){
 //     var array : any[] = [];
 //     while(i < 12){
@@ -33,13 +39,13 @@ var i = 0;
 // }
 function CreatingRandom() {
     var array = [];
-    while (array.length != 10) {
-        var a = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+    while (array.length != 4) {
+        var a = Math.floor(Math.random() * (4 - 1 + 1)) + 1;
         if (lodash.indexOf(array, a) == -1) {
             array.push(a);
         }
         else {
-            var a = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
+            var a = Math.floor(Math.random() * (4 - 1 + 1)) + 1;
             if (lodash.indexOf(array, a) == -1) {
                 array.push(a);
             }
@@ -47,12 +53,24 @@ function CreatingRandom() {
         i++;
     }
     console.log(array);
+    return array;
 }
-app.use(express.static(path.join(__dirname, "./../client")));
-CreatingRandom();
 var schema = new mongoose.Schema({
     question: String,
     id: Number
+});
+app.get('/data', function (req, res) {
+    var taken = lodash.take(num, 1);
+    num = lodash.drop(num, 1);
+    quizz.findOne({ id: 1 }, function (err, data) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log(data);
+            res.json(data);
+        }
+    });
 });
 var quizz = mongoose.model('Quiz', schema);
 var firstDoc = new quizz({
@@ -84,13 +102,18 @@ quizz.insertMany(question_data, function (err, res) {
         console.log("Data Saved Successful");
     }
 });
-quizz.findOne({ id: '1' }, function (err, res) {
-    if (err) {
-        console.log(err);
-    }
-    else {
-    }
-});
+function sending() {
+    var taken = lodash.take(num, 1);
+    num = lodash.drop(num, 1);
+    quizz.findOne({ id: taken[0] }, function (err, data) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log(data);
+        }
+    });
+}
 // firstDoc.save(function(err, res){
 //      if(err){
 //        console.log("error occured while saving document object " + err )
